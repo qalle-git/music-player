@@ -4,6 +4,9 @@
 #include "TinyTimber.h"
 #include <stdbool.h>
 
+#define initToneGenerator()                                                    \
+  { initObject(), false, false, 0, 0, 0, 10 }
+
 typedef struct {
   Object super;
 

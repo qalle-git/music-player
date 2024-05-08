@@ -3,6 +3,9 @@
 
 #include "canHandler.h"
 
+#define initApp()                                                              \
+  { initObject(), 0, {0}, DISCONNECTED }
+
 typedef struct {
   Object super;
   int index;

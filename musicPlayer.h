@@ -4,6 +4,9 @@
 #include "TinyTimber.h"
 #include <stdbool.h>
 
+#define initMusicPlayer()                                                      \
+  { initObject(), false, false, 0, 0, 120 }
+
 typedef struct {
   Object super;
 

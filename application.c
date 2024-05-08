@@ -40,9 +40,9 @@ void start_app(App *self, int unused);
 void reader(App *self, int);
 void receiver(App *self, int);
 
-App app = {initObject(), 0, {}, DISCONNECTED};
-MusicPlayer music_player = {initObject(), 0, 0, 0, 0, 120};
-ToneGenerator tone_generator = {initObject(), 0, 0, 0, 0, 0, 10};
+App app = initApp();
+MusicPlayer music_player = initMusicPlayer();
+ToneGenerator tone_generator = initToneGenerator();
 
 Serial sci0 = initSerial(SCI_PORT0, &app, reader);
 Can can0 = initCan(CAN_PORT0, &app, receiver);
@@ -50,6 +50,7 @@ Can can0 = initCan(CAN_PORT0, &app, receiver);
 int main() {
   INSTALL(&sci0, sci_interrupt, SCI_IRQ0);
   INSTALL(&can0, can_interrupt, CAN_IRQ0);
+
   TINYTIMBER(&app, start_app, 0);
 
   return 0;
@@ -74,6 +75,7 @@ void start_app(App *self, int unused) {
   print_raw("Welcome to the Music Player!\n");
   print_raw("/-----------------------------------\\\n");
   print_raw("Press 'e' to connect as conductor.\n");
+  print_raw("Press 'd' to connect as musician.\n");
   print_raw("\n");
   print_raw("Press 'w' to increase volume.\n");
   print_raw("Press 's' to decrease volume.\n");
@@ -95,7 +97,7 @@ void receiver(App *self, int unused) {
   if (self->state == MUSICIAN)
     can_action(&msg);
   else {
-    print_raw("Received can, either you got the same noteId or you're a "
+    print_raw("Received can, either you got the same nodeId or you're a "
               "conductor.\n");
   }
 }
