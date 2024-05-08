@@ -52,6 +52,14 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="canHandler.h"/>
+    <File Name="canHandler.c"/>
+    <File Name="toneGenerator.h"/>
+    <File Name="toneGenerator.c"/>
+    <File Name="musicPlayer.c"/>
+    <File Name="musicPlayer.h"/>
+    <File Name="melody.c"/>
+    <File Name="melody.h"/>
     <File Name="application.c" ExcludeProjConfig=""/>
     <File Name="sciTinyTimber.c"/>
     <File Name="sciTinyTimber.h"/>

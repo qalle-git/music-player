@@ -1,0 +1,4 @@
+-IC:\Users\calle\Documents\GitHub\Skola\music-player
+-IC:\Users\calle\Documents\GitHub\Skola\music-player\device\inc
+-IC:\Users\calle\Documents\GitHub\Skola\music-player\driver\inc
+-DSTM32F40_41xxx
