@@ -52,6 +52,10 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="buttonHandler.h"/>
+    <File Name="buttonHandler.c"/>
+    <File Name="sioTinyTimber.h"/>
+    <File Name="sioTinyTimber.c"/>
     <File Name="canHandler.h"/>
     <File Name="canHandler.c"/>
     <File Name="toneGenerator.h"/>

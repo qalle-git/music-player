@@ -31,8 +31,10 @@
 #include <stdlib.h>
 
 #include "application.h"
+#include "buttonHandler.h"
 #include "canHandler.h"
 #include "musicPlayer.h"
+#include "sioTinyTimber.h"
 #include "toneGenerator.h"
 
 void start_app(App *self, int unused);
@@ -44,12 +46,17 @@ App app = initApp();
 MusicPlayer music_player = initMusicPlayer();
 ToneGenerator tone_generator = initToneGenerator();
 
+ButtonHandler button_handler = initButtonHandler();
+
 Serial sci0 = initSerial(SCI_PORT0, &app, reader);
 Can can0 = initCan(CAN_PORT0, &app, receiver);
+
+SysIO sio = initSysIO(SIO_PORT0, &button_handler, sio_reader);
 
 int main() {
   INSTALL(&sci0, sci_interrupt, SCI_IRQ0);
   INSTALL(&can0, can_interrupt, CAN_IRQ0);
+  INSTALL(&sio, sio_interrupt, SIO_IRQ0);
 
   TINYTIMBER(&app, start_app, 0);
 
@@ -71,6 +78,7 @@ void print_raw(char *string) {
 void start_app(App *self, int unused) {
   CAN_INIT(&can0);
   SCI_INIT(&sci0);
+  SIO_INIT(&sio);
 
   print_raw("Welcome to the Music Player!\n");
   print_raw("/-----------------------------------\\\n");

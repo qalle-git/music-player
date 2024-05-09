@@ -2,6 +2,7 @@
 #define APPLICATION_H
 
 #include "canHandler.h"
+#include "sioTinyTimber.h"
 
 #define initApp()                                                              \
   { initObject(), 0, {0}, DISCONNECTED }
@@ -20,5 +21,6 @@ void print_raw(char *string);
 MUSIC_PLAYER_STATE get_state(App *self);
 
 extern App app;
+extern SysIO sio;
 
 #endif
