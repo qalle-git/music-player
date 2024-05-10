@@ -2,10 +2,11 @@
 #define MUSIC_PLAYER_H
 
 #include "TinyTimber.h"
+#include "melody.h"
 #include <stdbool.h>
 
 #define initMusicPlayer()                                                      \
-  { initObject(), false, false, 0, 0, 120 }
+  { initObject(), false, false, 0, 0, DEFAULT_BPM }
 
 typedef struct {
   Object super;
@@ -28,6 +29,7 @@ bool toggle_music_mute(MusicPlayer *self);
 
 int change_music_volume(MusicPlayer *self, int increment);
 bool change_tempo(MusicPlayer *self, int bpm);
+bool change_tempo_uncensored(MusicPlayer *self, int bpm);
 bool change_key(MusicPlayer *self, int key);
 
 extern MusicPlayer music_player;

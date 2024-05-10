@@ -52,6 +52,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="ledHandler.h"/>
+    <File Name="ledHandler.c"/>
     <File Name="buttonHandler.h"/>
     <File Name="buttonHandler.c"/>
     <File Name="sioTinyTimber.h"/>

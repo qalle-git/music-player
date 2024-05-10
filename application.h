@@ -2,6 +2,7 @@
 #define APPLICATION_H
 
 #include "canHandler.h"
+#include "ledHandler.h"
 #include "sioTinyTimber.h"
 
 #define initApp()                                                              \
@@ -22,5 +23,6 @@ MUSIC_PLAYER_STATE get_state(App *self);
 
 extern App app;
 extern SysIO sio;
+extern LedHandler led_handler;
 
 #endif

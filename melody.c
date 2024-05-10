@@ -36,6 +36,24 @@ const float TWINKLE_MELODY_BEATS[32] = {
     BEAT_A, BEAT_A, BEAT_B // "Like a diamond in the sky"
 };
 
+const int PIRATES_MELODY_FREQUENCY_INDICES[32] = {
+    7, 5, 7,  9,  10, 12, 10, 9, // Opening riff
+    7, 9, 10, 12, 14, 12, 10, 9, // Transition to next phrase
+    7, 5, 7,  9,  10, 12, 10, 9, // Repeat with variation
+    7, 9, 10, 12, 14, 12, 10, 9  // Ending riff
+};
+
+const float PIRATES_MELODY_BEATS[32] = {
+    BEAT_A, BEAT_A, BEAT_B, BEAT_B, // Fast-paced pattern
+    BEAT_A, BEAT_A, BEAT_B, BEAT_B, // With some variations
+    BEAT_A, BEAT_A, BEAT_B, BEAT_B, // Similar rhythm pattern
+    BEAT_A, BEAT_A, BEAT_B, BEAT_B, // Repeated beat pattern
+    BEAT_A, BEAT_A, BEAT_B, BEAT_B, // Ending pattern
+    BEAT_A, BEAT_A, BEAT_B, BEAT_B, // Repeat opening variation
+    BEAT_A, BEAT_A, BEAT_B, BEAT_B, // Fast-paced ending
+    BEAT_A, BEAT_A, BEAT_B, BEAT_B  // Ending riff
+};
+
 /**
  * Gives the period based on the given frequency indice.
  *

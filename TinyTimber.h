@@ -40,6 +40,7 @@
 #ifndef _TINYTIMBER_
 #define _TINYTIMBER_
 
+#include <stdint.h>
 #define TINYTIMBER_VERSION "v2.06a1 (2021-03-11)"
 
 #include "stm32f4xx.h"

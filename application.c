@@ -23,6 +23,7 @@
 
 #include "TinyTimber.h"
 #include "canTinyTimber.h"
+#include "ledHandler.h"
 #include "sciTinyTimber.h"
 #include <complex.h>
 #include <ctype.h>
@@ -47,6 +48,7 @@ MusicPlayer music_player = initMusicPlayer();
 ToneGenerator tone_generator = initToneGenerator();
 
 ButtonHandler button_handler = initButtonHandler();
+LedHandler led_handler = initLedHandler();
 
 Serial sci0 = initSerial(SCI_PORT0, &app, reader);
 Can can0 = initCan(CAN_PORT0, &app, receiver);

@@ -1,4 +1,7 @@
 #include "TinyTimber.h"
+#include "canHandler.h"
+#include "melody.h"
+#include "musicPlayer.h"
 #include "sioTinyTimber.h"
 
 #include "application.h"
@@ -35,9 +38,20 @@ void sio_reader(ButtonHandler *self, int unused) {
     ABORT(self->hold_call);
 
     if (self->mode == BUTTON_HOLD) {
+      const int held_for = SEC_OF(T_SAMPLE((&held_timer)));
+
       print("Button was held for %d seconds after initiating press-and-hold "
             "mode.\n",
-            SEC_OF(T_SAMPLE((&held_timer))));
+            held_for);
+
+      if (held_for >= 2) {
+        bool changed =
+            SYNC(&music_player, change_tempo_uncensored, DEFAULT_BPM);
+
+        if (changed) {
+          print("Tempo changed to %d BPM (Default).\n", DEFAULT_BPM);
+        }
+      }
     } else {
       button_was_released(self, time_since_last_press);
     }
@@ -83,6 +97,14 @@ void button_was_released(ButtonHandler *self, int milliseconds_since_press) {
     const int burst_bpm = 60000 / burst_average;
 
     print("Set Tempo to %d BPM\n", burst_bpm);
+
+    bool changed = SYNC(&music_player, change_tempo_uncensored, burst_bpm);
+
+    if (changed) {
+      print("Tempo changed to %d BPM.\n", burst_bpm);
+    } else {
+      print_raw("Tempo out of range, can't be set.\n");
+    }
 
     self->burst_length = 0;
 

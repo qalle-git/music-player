@@ -1,4 +1,6 @@
 #include "musicPlayer.h"
+#include "application.h"
+#include "ledHandler.h"
 #include "melody.h"
 #include "toneGenerator.h"
 
@@ -9,7 +11,10 @@ bool start_music(MusicPlayer *self) {
   self->is_playing = true;
   self->tone_index = 0;
 
-  SEND(MSEC(0), MSEC(0), self, player_tick, 0);
+  ASYNC(self, player_tick, 0);
+
+  SYNC(&led_handler, set_led, LED_ON);
+  ASYNC(&led_handler, led_tick, 0);
 
   return true;
 }
@@ -24,6 +29,7 @@ bool stop_music(MusicPlayer *self) {
   *DAC_ADDRESS = 0;
 
   SYNC(&tone_generator, stop_tone, 0);
+  SYNC(&led_handler, set_led, LED_DISABLED);
 
   return true;
 }
@@ -45,6 +51,19 @@ bool change_tempo(MusicPlayer *self, int bpm) {
     return false;
 
   self->tempo = bpm;
+
+  ASYNC(&led_handler, set_led_blink_period, bpm / 2);
+
+  return true;
+}
+
+bool change_tempo_uncensored(MusicPlayer *self, int bpm) {
+  if (bpm < MIN_TEMPO - 30 || bpm > MAX_TEMPO + 60)
+    return false;
+
+  self->tempo = bpm;
+
+  ASYNC(&led_handler, set_led_blink_period, bpm / 2);
 
   return true;
 }
@@ -68,7 +87,10 @@ void player_tick(MusicPlayer *self, int unused) {
 #ifdef TWINKLE
     int current_frequency =
         TWINKLE_MELODY_FREQUENCY_INDICES[self->tone_index] + self->key;
-#else
+#elif defined(PIRATES)
+    int current_frequency =
+        PIRATES_MELODY_FREQUENCY_INDICES[self->tone_index] + self->key;
+#elif defined(BROTHER_JOHN)
     int current_frequency =
         MELODY_FREQUENCY_INDICES[self->tone_index] + self->key;
 #endif
@@ -78,7 +100,10 @@ void player_tick(MusicPlayer *self, int unused) {
 #ifdef TWINKLE
     // Calculate the beat duration in milliseconds.
     int beatMS = 60000 / (self->tempo * TWINKLE_MELODY_BEATS[self->tone_index]);
-#else
+#elif defined(PIRATES)
+    // Calculate the beat duration in milliseconds.
+    int beatMS = 60000 / (self->tempo * PIRATES_MELODY_BEATS[self->tone_index]);
+#elif defined(BROTHER_JOHN)
     // Calculate the beat duration in milliseconds.
     int beatMS = 60000 / (self->tempo * MELODY_BEATS[self->tone_index]);
 #endif

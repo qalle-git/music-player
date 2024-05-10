@@ -2,6 +2,8 @@
 #define MELODY_H
 
 // #define TWINKLE
+// #define PIRATES
+#define BROTHER_JOHN
 
 #define MIN_VOLUME 1
 #define MAX_VOLUME 25
@@ -17,6 +19,8 @@
 
 #define GAP_SILENCE 85
 
+#define DEFAULT_BPM 120
+
 #define BEAT_A (1.)
 #define BEAT_B (BEAT_A / 2.)
 #define BEAT_C (BEAT_A * 2.)
@@ -30,6 +34,9 @@ extern const float MELODY_BEATS[32];
 
 extern const int TWINKLE_MELODY_FREQUENCY_INDICES[32];
 extern const float TWINKLE_MELODY_BEATS[32];
+
+extern const int PIRATES_MELODY_FREQUENCY_INDICES[32];
+extern const float PIRATES_MELODY_BEATS[32];
 
 int get_period_from_frequency_indice(int indice);
 void get_frequencies_with_key_offset(int offset, int *new_array);
