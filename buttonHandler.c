@@ -9,6 +9,7 @@
 #include <stdlib.h>
 
 Timer last_button_press = initTimer();
+Timer last_release_press = initTimer();
 Timer held_timer = initTimer();
 
 Time get_time_since_last_button_press() { return T_SAMPLE(&last_button_press); }
@@ -16,16 +17,16 @@ Time get_time_since_last_button_press() { return T_SAMPLE(&last_button_press); }
 void sio_reader(ButtonHandler *self, int unused) {
   int button_state = SIO_READ(&sio);
 
-  const int time_since_last_press = MSEC_OF(get_time_since_last_button_press());
-
-  if (time_since_last_press < CONTACT_BOUNCE_FILTER_MS) {
-    return;
-  }
+  const int time_since_last_press = get_time_since_last_button_press() / 100;
 
   if (button_state == BUTTON_PRESSED) {
     self->mode = BUTTON_PRESS;
 
     SIO_TRIG(&sio, BUTTON_RELEASED);
+
+    if (time_since_last_press < CONTACT_BOUNCE_FILTER_MS) {
+      return;
+    }
 
     print_raw("Button pressed\n");
 
@@ -36,6 +37,10 @@ void sio_reader(ButtonHandler *self, int unused) {
     SIO_TRIG(&sio, BUTTON_PRESSED);
 
     ABORT(self->hold_call);
+
+    if (time_since_last_press < CONTACT_BOUNCE_FILTER_MS) {
+      return;
+    }
 
     if (self->mode == BUTTON_HOLD) {
       const int held_for = SEC_OF(T_SAMPLE((&held_timer)));
@@ -51,9 +56,11 @@ void sio_reader(ButtonHandler *self, int unused) {
         if (changed) {
           print("Tempo changed to %d BPM (Default).\n", DEFAULT_BPM);
         }
+      } else {
+        reset_burst(self);
       }
     } else {
-      button_was_released(self, time_since_last_press);
+      button_was_released(self);
     }
 
     T_RESET(&last_button_press);
@@ -68,26 +75,35 @@ void button_was_held(ButtonHandler *self, int unused) {
   T_RESET(&held_timer);
 }
 
-void button_was_released(ButtonHandler *self, int milliseconds_since_press) {
-  print("Button released after %d milliseconds.\n", milliseconds_since_press);
+void button_was_released(ButtonHandler *self) {
+  if (!self->first_release) {
+    self->first_release = 1;
+
+    T_RESET(&last_release_press);
+
+    print_raw("Initiated tempo burst mode.\n");
+
+    return;
+  }
+
+  int new_burst = (T_SAMPLE(&last_release_press)) / 100;
 
   if (self->burst_length > 0) {
-    for (int burst_index = 0; burst_index < self->burst_length; burst_index++) {
-      const int burst = self->burst[burst_index];
+    const int first_burst = self->burst[0];
 
-      if (abs(burst - milliseconds_since_press) > BURST_COMPATIBLE_MS) {
-        print("Burst is not compatible with %dms.\n", milliseconds_since_press);
+    if (abs(first_burst - new_burst) > BURST_COMPATIBLE_MS) {
+      print("Burst is not compatible with %dms gap.\n",
+            abs(first_burst - new_burst));
 
-        self->burst_length = 0;
+      reset_burst(self);
 
-        return;
-      }
+      return;
     }
   }
 
-  self->burst[self->burst_length++] = milliseconds_since_press;
+  self->burst[self->burst_length++] = new_burst;
 
-  print("Burst added to buffer: %d\n", milliseconds_since_press);
+  print("Interval added to buffer: %d\n", new_burst);
 
   if (self->burst_length == MAX_BURST_LENGTH) {
     print_raw("Burst buffer is full.\n");
@@ -106,10 +122,19 @@ void button_was_released(ButtonHandler *self, int milliseconds_since_press) {
       print_raw("Tempo out of range, can't be set.\n");
     }
 
-    self->burst_length = 0;
+    reset_burst(self);
 
     return;
   }
+
+  T_RESET(&last_release_press);
+}
+
+void reset_burst(ButtonHandler *self) {
+  self->burst_length = 0;
+  self->first_release = 0;
+
+  T_RESET(&last_release_press);
 }
 
 int calculate_burst_average(ButtonHandler *self) {

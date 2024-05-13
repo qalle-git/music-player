@@ -11,10 +11,11 @@ bool start_music(MusicPlayer *self) {
   self->is_playing = true;
   self->tone_index = 0;
 
-  ASYNC(self, player_tick, 0);
-
+  SYNC(&led_handler, set_led_blink_period, self->tempo);
   SYNC(&led_handler, set_led, LED_ON);
-  ASYNC(&led_handler, led_tick, 0);
+  SYNC(&led_handler, led_tick, 0);
+
+  ASYNC(self, player_tick, 0);
 
   return true;
 }
@@ -52,7 +53,7 @@ bool change_tempo(MusicPlayer *self, int bpm) {
 
   self->tempo = bpm;
 
-  ASYNC(&led_handler, set_led_blink_period, bpm / 2);
+  ASYNC(&led_handler, set_led_blink_period, bpm);
 
   return true;
 }
@@ -63,7 +64,7 @@ bool change_tempo_uncensored(MusicPlayer *self, int bpm) {
 
   self->tempo = bpm;
 
-  ASYNC(&led_handler, set_led_blink_period, bpm / 2);
+  ASYNC(&led_handler, set_led_blink_period, bpm);
 
   return true;
 }
@@ -108,6 +109,7 @@ void player_tick(MusicPlayer *self, int unused) {
     int beatMS = 60000 / (self->tempo * MELODY_BEATS[self->tone_index]);
 #endif
 
+    SYNC(&led_handler, set_next_tone, 0);
     ASYNC(&tone_generator, tone_tick, 0);
 
     // Go to next tone after the current beat.

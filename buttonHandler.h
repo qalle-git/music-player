@@ -2,6 +2,7 @@
 #define BUTTON_HANDLER_H
 
 #include "TinyTimber.h"
+#include <stdbool.h>
 
 typedef enum {
   BUTTON_PRESSED,
@@ -11,7 +12,7 @@ typedef enum {
 typedef enum { BUTTON_PRESS, BUTTON_HOLD } BUTTON_MODE;
 
 #define initButtonHandler()                                                    \
-  { initObject(), BUTTON_PRESS, {}, 0, NULL }
+  { initObject(), BUTTON_PRESS, {}, 0, 0, NULL }
 
 #define CONTACT_BOUNCE_FILTER_MS 100
 
@@ -26,6 +27,8 @@ typedef struct {
   int burst[MAX_BURST_LENGTH];
   int burst_length;
 
+  bool first_release;
+
   Msg hold_call;
 } ButtonHandler;
 
@@ -34,8 +37,10 @@ Time get_time_since_last_button_press();
 void sio_reader(ButtonHandler *self, int unused);
 
 void button_was_held(ButtonHandler *self, int unused);
-void button_was_released(ButtonHandler *self, int milliseconds_since_press);
+void button_was_released(ButtonHandler *self);
 
 int calculate_burst_average(ButtonHandler *self);
+
+void reset_burst(ButtonHandler *self);
 
 #endif
