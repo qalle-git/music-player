@@ -104,12 +104,7 @@ void receiver(App *self, int unused) {
 
   CAN_RECEIVE(&can0, &msg);
 
-  if (self->state == MUSICIAN)
-    can_action(&msg);
-  else {
-    print_raw("Received can, either you got the same nodeId or you're a "
-              "conductor.\n");
-  }
+  can_action(&msg, self->state);
 }
 
 /**

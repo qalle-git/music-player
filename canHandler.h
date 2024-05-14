@@ -25,7 +25,7 @@ typedef enum {
 } CAN_ACTION;
 
 // CAN
-bool can_action(CANMsg *msg);
+bool can_action(CANMsg *msg, MUSIC_PLAYER_STATE state);
 bool send_can_action(Can *self, CAN_ACTION can_action, char *data,
                      int data_length);
 

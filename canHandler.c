@@ -1,11 +1,12 @@
 #include "canHandler.h"
 #include "application.h"
+#include "canHandler.h"
 #include "canTinyTimber.h"
 #include "musicPlayer.h"
 #include <stdbool.h>
 #include <stdlib.h>
 
-bool can_action(CANMsg *msg) {
+bool can_action(CANMsg *msg, MUSIC_PLAYER_STATE user_state) {
   const int action_id = msg->msgId;
 
   const int data = atoi((char *)msg->buff);
@@ -13,6 +14,13 @@ bool can_action(CANMsg *msg) {
 
   print("Can Received: Action: %d ", action_id);
   print("Data: %d\n", data);
+
+  if (user_state == DISCONNECTED || user_state == CONDUCTOR) {
+    print_raw(
+        "User is ignoring can message, either disconnected or a conductor.\n");
+
+    return false;
+  }
 
   switch (action_id) {
   case STOP_MUSIC:

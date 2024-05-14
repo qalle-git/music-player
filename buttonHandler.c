@@ -13,34 +13,52 @@ Timer last_release_press = initTimer();
 Timer held_timer = initTimer();
 
 Time get_time_since_last_button_press() { return T_SAMPLE(&last_button_press); }
+Time get_time_since_last_release_press() {
+  return T_SAMPLE(&last_release_press);
+}
 
 void sio_reader(ButtonHandler *self, int unused) {
   int button_state = SIO_READ(&sio);
 
-  const int time_since_last_press = get_time_since_last_button_press() / 100;
+  const int time_since_last_activation =
+      get_time_since_last_button_press() / 100;
+
+  if (time_since_last_activation < CONTACT_BOUNCE_FILTER_MS) {
+    print_raw("Contact bounce detected, ignoring activation.\n");
+
+    if (button_state == BUTTON_RELEASED) {
+      if (self->hold_call) {
+        ABORT(self->hold_call);
+
+        self->hold_call = NULL;
+      }
+    }
+
+    return;
+  }
+
+  T_RESET(&last_button_press);
 
   if (button_state == BUTTON_PRESSED) {
+    print_raw("Button pressed.\n");
+
     self->mode = BUTTON_PRESS;
 
     SIO_TRIG(&sio, BUTTON_RELEASED);
 
-    if (time_since_last_press < CONTACT_BOUNCE_FILTER_MS) {
-      return;
+    if (self->hold_call) {
+      ABORT(self->hold_call);
     }
 
-    print_raw("Button pressed\n");
-
     self->hold_call = AFTER(SEC(1), self, button_was_held, 0);
-
-    T_RESET(&last_button_press);
   } else {
+    print_raw("Button released.\n");
+
     SIO_TRIG(&sio, BUTTON_PRESSED);
 
     ABORT(self->hold_call);
 
-    if (time_since_last_press < CONTACT_BOUNCE_FILTER_MS) {
-      return;
-    }
+    self->hold_call = NULL;
 
     if (self->mode == BUTTON_HOLD) {
       const int held_for = SEC_OF(T_SAMPLE((&held_timer)));
@@ -62,8 +80,6 @@ void sio_reader(ButtonHandler *self, int unused) {
     } else {
       button_was_released(self);
     }
-
-    T_RESET(&last_button_press);
   }
 }
 
@@ -77,7 +93,7 @@ void button_was_held(ButtonHandler *self, int unused) {
 
 void button_was_released(ButtonHandler *self) {
   if (!self->first_release) {
-    self->first_release = 1;
+    self->first_release = true;
 
     T_RESET(&last_release_press);
 
@@ -132,7 +148,7 @@ void button_was_released(ButtonHandler *self) {
 
 void reset_burst(ButtonHandler *self) {
   self->burst_length = 0;
-  self->first_release = 0;
+  self->first_release = false;
 
   T_RESET(&last_release_press);
 }
