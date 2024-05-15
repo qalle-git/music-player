@@ -59,7 +59,7 @@ void sio_reader(ButtonHandler *self, int unused) {
 
       if (held_for >= 2) {
         bool changed =
-            ASYNC(&music_player, change_tempo_uncensored, DEFAULT_BPM);
+            SYNC(&music_player, change_tempo_uncensored, DEFAULT_BPM);
 
         if (changed) {
           print("Tempo changed to %d BPM (Default).\n", DEFAULT_BPM);
