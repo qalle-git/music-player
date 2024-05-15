@@ -34,7 +34,8 @@ void set_next_tone(LedHandler *self, int unused) {
 
   self->current_blink_period = self->blink_period;
 
-  ABORT(self->led_tick_call);
+  if (self->led_tick_call)
+    ABORT(self->led_tick_call);
 
   self->led_tick_call =
       SEND(MSEC(self->current_blink_period), USEC(100), self, led_tick, 0);
