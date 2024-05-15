@@ -15,8 +15,8 @@ typedef enum {
 
 // CAN Actions, in priority order.
 typedef enum {
-  STOP_MUSIC,
   PLAY_MUSIC,
+  STOP_MUSIC,
   CHANGE_VOLUME,
   CHANGE_TEMPO,
   CHANGE_KEY,

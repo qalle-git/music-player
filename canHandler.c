@@ -23,19 +23,19 @@ bool can_action(CANMsg *msg, MUSIC_PLAYER_STATE user_state) {
   }
 
   switch (action_id) {
-  case STOP_MUSIC:
-    if (SYNC(&music_player, stop_music, 0)) {
-      print_raw("Music is now stopped.\n");
-    } else {
-      print_raw("Music is already stopped.\n");
-    }
-
-    break;
   case PLAY_MUSIC:
     if (SYNC(&music_player, start_music, 0)) {
       print_raw("Music is now playing from the beginning.\n");
     } else {
       print_raw("Music is already playing.\n");
+    }
+
+    break;
+  case STOP_MUSIC:
+    if (SYNC(&music_player, stop_music, 0)) {
+      print_raw("Music is now stopped.\n");
+    } else {
+      print_raw("Music is already stopped.\n");
     }
 
     break;
@@ -100,12 +100,9 @@ bool can_action(CANMsg *msg, MUSIC_PLAYER_STATE user_state) {
 
 bool send_can_action(Can *self, CAN_ACTION can_action, char *data,
                      int data_length) {
-  if (data_length > 8) {
+  if (data_length > CAN_BUFSIZE) {
     return false;
   }
-
-  if (self->count >= CAN_BUFSIZE)
-    return false;
 
   CANMsg can_msg;
 

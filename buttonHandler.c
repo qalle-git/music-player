@@ -23,23 +23,15 @@ void sio_reader(ButtonHandler *self, int unused) {
   const int time_since_last_activation =
       get_time_since_last_button_press() / 100;
 
-  if (time_since_last_activation < CONTACT_BOUNCE_FILTER_MS) {
-    print_raw("Contact bounce detected, ignoring activation.\n");
+  if (button_state == BUTTON_PRESSED) {
+    if (time_since_last_activation < CONTACT_BOUNCE_FILTER_MS) {
+      print_raw("Contact bounce detected, ignoring activation.\n");
 
-    if (button_state == BUTTON_RELEASED) {
-      if (self->hold_call) {
-        ABORT(self->hold_call);
-
-        self->hold_call = NULL;
-      }
+      return;
     }
 
-    return;
-  }
+    T_RESET(&last_button_press);
 
-  T_RESET(&last_button_press);
-
-  if (button_state == BUTTON_PRESSED) {
     print_raw("Button pressed.\n");
 
     self->mode = BUTTON_PRESS;
@@ -48,6 +40,8 @@ void sio_reader(ButtonHandler *self, int unused) {
 
     if (self->hold_call) {
       ABORT(self->hold_call);
+
+      self->hold_call = NULL;
     }
 
     self->hold_call = AFTER(SEC(1), self, button_was_held, 0);
@@ -56,12 +50,8 @@ void sio_reader(ButtonHandler *self, int unused) {
 
     SIO_TRIG(&sio, BUTTON_PRESSED);
 
-    ABORT(self->hold_call);
-
-    self->hold_call = NULL;
-
     if (self->mode == BUTTON_HOLD) {
-      const int held_for = SEC_OF(T_SAMPLE((&held_timer)));
+      const int held_for = SEC_OF(T_SAMPLE((&held_timer))) + 1;
 
       print("Button was held for %d seconds after initiating press-and-hold "
             "mode.\n",
@@ -69,7 +59,7 @@ void sio_reader(ButtonHandler *self, int unused) {
 
       if (held_for >= 2) {
         bool changed =
-            SYNC(&music_player, change_tempo_uncensored, DEFAULT_BPM);
+            ASYNC(&music_player, change_tempo_uncensored, DEFAULT_BPM);
 
         if (changed) {
           print("Tempo changed to %d BPM (Default).\n", DEFAULT_BPM);
@@ -77,8 +67,16 @@ void sio_reader(ButtonHandler *self, int unused) {
       } else {
         reset_burst(self);
       }
+
+      self->hold_call = NULL;
     } else {
       button_was_released(self);
+
+      if (self->hold_call) {
+        ABORT(self->hold_call);
+
+        self->hold_call = NULL;
+      }
     }
   }
 }

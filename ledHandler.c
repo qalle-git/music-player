@@ -29,6 +29,9 @@ void set_led_blink_period(LedHandler *self, int period) {
 }
 
 void set_next_tone(LedHandler *self, int unused) {
+  if (self->current_blink_period == self->blink_period)
+    return;
+
   self->current_blink_period = self->blink_period;
 
   ABORT(self->led_tick_call);
